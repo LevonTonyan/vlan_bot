@@ -17,7 +17,23 @@ def get_user_message(message):
 
     sheet = rb.sheet_by_index(0)
     for rownum in range(sheet.nrows):
-        print(sheet.row_values(rownum ,5 ,6), message.text)
+        row = str(sheet.row_values(rownum, 1, 2)[0]).split(",")
+        if len(row) > 1:
+            for i in row:
+                if i == message.text:
+                    bot.reply_to(message, sheet.row_values(rownum, 0, 1)[0])
+                    break
+        elif row[0].split(".")[0] == message.text:
+            bot.reply_to(message, sheet.row_values(rownum, 0, 1)[0])
+            break
+
+
+
+
+
+
+
+
 
 
 

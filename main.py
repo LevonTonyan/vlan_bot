@@ -1,6 +1,9 @@
 import telebot
 from telebot import types
-import xlrd
+import base64
+import json
+import requests
+import pdfkit
 
 
 bot = telebot.TeleBot("5965917042:AAEeegS2itBOoqeRebv8nUdoDedrTC6QnD0")
@@ -12,21 +15,16 @@ def send_welcome(message):
 
 @bot.message_handler()
 def get_user_message(message):
+    data = requests.get("https://api.allreports.tools/wp-json/v1/get_report_by_wholesaler/WAUDG74F25N111998/68523d5476af56837fd1b57c867f2fe9/carfax/en")
+    js = data.json()
+    report = js["report"]["report"]
+    decoded = base64.b64decode(report)
+    html = decoded.decode("utf-8")
+    pdfkit.from_string(html, f'{js["report"]["id"]}.pdf')
+    carfax =  open(f'./{js["report"]["id"]}.pdf', "rb")
+    bot.send_document(message.chat.id, carfax)
 
-    rb =xlrd.open_workbook('vlans.xls', formatting_info=True)
-
-    sheet = rb.sheet_by_index(0)
-    for rownum in range(sheet.nrows):
-        row = str(sheet.row_values(rownum, 1, 2)[0]).split(",")
-        if len(row) > 1:
-            for i in row:
-                if i == message.text:
-                    bot.reply_to(message, sheet.row_values(rownum, 0, 1)[0])
-                    break
-        elif row[0].split(".")[0] == message.text:
-            bot.reply_to(message, sheet.row_values(rownum, 0, 1)[0])
-            break
-
+    
 
 
 
